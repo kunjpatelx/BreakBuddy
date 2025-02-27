@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BreakBuddy - Your well-being companion for smarter breaks.">
+    <title>BreakBuddy - Smarter Breaks for Well-Being</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>BreakBuddy</h1>
+        <button id="modeSwitch" onclick="toggleMode()">Dark Mode</button>
+    </header>
+    <main>
+        <section class="intro">
+            <p>Your companion for stress-free workdays. Choose a technique, set your break, and unwind.</p>
+        </section>
+        <section class="controls">
+            <div class="input-group">
+                <label for="technique">Break Technique</label>
+                <select id="technique">
+                    <option value="pomodoro">Pomodoro (25 min work / 5 min break)</option>
+                    <option value="52-17">52/17 (52 min work / 17 min break)</option>
+                    <option value="90-minute">90-Minute (90 min work / 20 min break)</option>
+                    <option value="20-20-20">20-20-20 (20 min work / 20 sec break)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="breakType">Break Type</label>
+                <select id="breakType">
+                    <option value="relaxation">Relaxation</option>
+                    <option value="physical">Physical</option>
+                    <option value="mental">Mental</option>
+                </select>
+            </div>
+            <button id="startBtn" onclick="startTimer()">Start Break Timer</button>
+            <div id="timerDisplay" class="timer-display">Select a technique to begin.</div>
+        </section>
+        <section id="status" class="status">Ready to start your workday?</section>
+    </main>
+    <footer>
+        <p>&copy; 2025 BreakBuddy. Made for your well-being.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
