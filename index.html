@@ -6,6 +6,7 @@
     <meta name="description" content="BreakBuddy - Your well-being companion for smarter breaks.">
     <title>BreakBuddy - Smarter Breaks for Well-Being</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <header>
@@ -14,17 +15,24 @@
     </header>
     <main>
         <section class="intro">
-            <p>Your companion for stress-free workdays. Choose a technique, set your break, and unwind.</p>
+            <p>Your companion for stress-free workdays. Customize your breaks and recharge.</p>
         </section>
         <section class="controls">
             <div class="input-group">
                 <label for="technique">Break Technique</label>
-                <select id="technique">
-                    <option value="pomodoro">Pomodoro (25 min work / 5 min break)</option>
-                    <option value="52-17">52/17 (52 min work / 17 min break)</option>
-                    <option value="90-minute">90-Minute (90 min work / 20 min break)</option>
-                    <option value="20-20-20">20-20-20 (20 min work / 20 sec break)</option>
+                <select id="technique" onchange="updateCustomFields()">
+                    <option value="pomodoro">Pomodoro (25/5)</option>
+                    <option value="52-17">52/17 (52/17)</option>
+                    <option value="90-minute">90-Minute (90/20)</option>
+                    <option value="20-20-20">20-20-20 (20/0.33)</option>
+                    <option value="custom">Custom</option>
                 </select>
+            </div>
+            <div class="input-group custom-fields" style="display: none;">
+                <label for="workTime">Work Time (minutes)</label>
+                <input type="number" id="workTime" min="1" value="25">
+                <label for="breakTime">Break Time (minutes)</label>
+                <input type="number" id="breakTime" min="0.1" value="5" step="0.1">
             </div>
             <div class="input-group">
                 <label for="breakType">Break Type</label>
@@ -34,13 +42,23 @@
                     <option value="mental">Mental</option>
                 </select>
             </div>
-            <button id="startBtn" onclick="startTimer()">Start Break Timer</button>
+            <div class="button-group">
+                <button id="startBtn" onclick="startTimer()">Start</button>
+                <button id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+                <button id="resetBtn" onclick="resetTimer()" disabled>Reset</button>
+            </div>
             <div id="timerDisplay" class="timer-display">Select a technique to begin.</div>
+            <div id="feelingCheck" class="feeling-check" style="display: none;">
+                <p>How do you feel after your break?</p>
+                <button onclick="logFeeling('Great')">Great</button>
+                <button onclick="logFeeling('Okay')">Okay</button>
+                <button onclick="logFeeling('Tired')">Tired</button>
+            </div>
         </section>
         <section id="status" class="status">Ready to start your workday?</section>
     </main>
     <footer>
-        <p>&copy; 2025 BreakBuddy. Made for your well-being.</p>
+        <p>© 2025 BreakBuddy. Made for your well-being.</p>
     </footer>
     <script src="script.js"></script>
 </body>
