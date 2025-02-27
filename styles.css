@@ -12,19 +12,16 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
-/* Light mode (default) */
 body.light {
     background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
     color: #37474f;
 }
 
-/* Dark mode */
 body.dark {
     background: linear-gradient(135deg, #263238, #455a64);
     color: #eceff1;
 }
 
-/* Header */
 header {
     padding: 20px;
     display: flex;
@@ -48,6 +45,7 @@ h1 {
     border-radius: 20px;
     cursor: pointer;
     font-size: 14px;
+    transition: all 0.3s;
 }
 
 #modeSwitch:hover {
@@ -55,7 +53,6 @@ h1 {
     color: #fff;
 }
 
-/* Main */
 main {
     flex-grow: 1;
     max-width: 800px;
@@ -64,13 +61,10 @@ main {
     text-align: center;
 }
 
-.intro {
-    margin-bottom: 30px;
-}
-
 .intro p {
     font-size: 18px;
     opacity: 0.85;
+    margin-bottom: 30px;
 }
 
 .controls {
@@ -78,10 +72,16 @@ main {
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in;
 }
 
 body.dark .controls {
     background: rgba(66, 66, 66, 0.9);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .input-group {
@@ -95,7 +95,7 @@ label {
     display: block;
 }
 
-select {
+select, input {
     width: 100%;
     max-width: 300px;
     padding: 10px;
@@ -106,13 +106,19 @@ select {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-body.dark select {
+body.dark select, body.dark input {
     background: #546e7a;
     color: #eceff1;
 }
 
-#startBtn {
-    padding: 12px 30px;
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+button {
+    padding: 12px 20px;
     font-size: 16px;
     font-weight: 600;
     color: #fff;
@@ -120,16 +126,23 @@ body.dark select {
     border: none;
     border-radius: 25px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.2s;
 }
 
-#startBtn:hover {
+button:hover {
     background: #43a047;
+    transform: scale(1.05);
+}
+
+button:disabled {
+    background: #bdbdbd;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .timer-display {
     margin-top: 20px;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 500;
     color: #0288d1;
 }
@@ -138,13 +151,25 @@ body.dark .timer-display {
     color: #4fc3f7;
 }
 
+.feeling-check {
+    margin-top: 20px;
+}
+
+.feeling-check button {
+    background: #0288d1;
+    margin: 5px;
+}
+
+.feeling-check button:hover {
+    background: #0277bd;
+}
+
 .status {
     margin-top: 30px;
     font-size: 16px;
     opacity: 0.8;
 }
 
-/* Teams-style pop-up */
 .popup {
     position: fixed;
     bottom: 20px;
@@ -170,7 +195,6 @@ body.dark .popup {
     to { transform: translateY(0); opacity: 1; }
 }
 
-/* Footer */
 footer {
     padding: 20px;
     font-size: 14px;
