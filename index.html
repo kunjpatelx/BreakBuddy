@@ -3,63 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="BreakBuddy - Your well-being companion for smarter breaks.">
-    <title>BreakBuddy - Smarter Breaks for Well-Being</title>
+    <meta name="description" content="BreakBuddy - Prevent burnout with timed breaks">
+    <title>BreakBuddy - Hack Your Burnout</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Didot&display=swap" rel="stylesheet">
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </head>
 <body>
+    <canvas id="matrixCanvas"></canvas>
     <header>
-        <h1>BreakBuddy</h1>
-        <button id="modeSwitch" onclick="toggleMode()">Dark Mode</button>
+        <h1 id="title">BreakBuddy</h1>
+        <p id="tagline">Hack yer burnout with timed breaks!</p>
     </header>
     <main>
-        <section class="intro">
-            <p>Your companion for stress-free workdays. Customize your breaks and recharge.</p>
+        <section class="timer-controls scroll-section">
+            <h2>Choose Yer Break</h2>
+            <div class="options">
+                <button class="break-btn" data-minutes="5">5 Min</button>
+                <button class="break-btn" data-minutes="10">10 Min</button>
+                <button class="break-btn" data-minutes="15">15 Min</button>
+            </div>
+            <div class="timer-display">
+                <span id="timer">00:00</span>
+                <button id="toggle-btn">Start</button>
+            </div>
+            <div class="progress-bar" id="progress-bar"></div>
         </section>
-        <section class="controls">
-            <div class="input-group">
-                <label for="technique">Break Technique</label>
-                <select id="technique" onchange="updateCustomFields()">
-                    <option value="pomodoro">Pomodoro (25/5)</option>
-                    <option value="52-17">52/17 (52/17)</option>
-                    <option value="90-minute">90-Minute (90/20)</option>
-                    <option value="20-20-20">20-20-20 (20/0.33)</option>
-                    <option value="custom">Custom</option>
-                </select>
-            </div>
-            <div class="input-group custom-fields" style="display: none;">
-                <label for="workTime">Work Time (minutes)</label>
-                <input type="number" id="workTime" min="1" value="25">
-                <label for="breakTime">Break Time (minutes)</label>
-                <input type="number" id="breakTime" min="0.1" value="5" step="0.1">
-            </div>
-            <div class="input-group">
-                <label for="breakType">Break Type</label>
-                <select id="breakType">
-                    <option value="relaxation">Relaxation</option>
-                    <option value="physical">Physical</option>
-                    <option value="mental">Mental</option>
-                </select>
-            </div>
-            <div class="button-group">
-                <button id="startBtn" onclick="startTimer()">Start</button>
-                <button id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
-                <button id="resetBtn" onclick="resetTimer()" disabled>Reset</button>
-            </div>
-            <div id="timerDisplay" class="timer-display">Select a technique to begin.</div>
-            <div id="feelingCheck" class="feeling-check" style="display: none;">
-                <p>How do you feel after your break?</p>
-                <button onclick="logFeeling('Great')">Great</button>
-                <button onclick="logFeeling('Okay')">Okay</button>
-                <button onclick="logFeeling('Tired')">Tired</button>
-            </div>
-        </section>
-        <section id="status" class="status">Ready to start your workday?</section>
     </main>
     <footer>
-        <p>© 2025 BreakBuddy. Made for your well-being.</p>
+        <p>© 2025 Kunj Patel. Decoded from the Matrix.</p>
     </footer>
+    <audio id="breakSound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
     <script src="script.js"></script>
 </body>
 </html>
