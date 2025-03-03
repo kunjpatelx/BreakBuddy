@@ -3,42 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="BreakBuddy - Prevent burnout with timed breaks">
-    <title>BreakBuddy - Hack Your Burnout</title>
+    <title>BreakBuddy - Recharge with Nature</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Didot&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </head>
 <body>
-    <canvas id="matrixCanvas"></canvas>
     <header>
-        <h1 id="title">BreakBuddy</h1>
-        <p id="tagline">Hack yer burnout with timed breaks!</p>
+        <h1>BreakBuddy</h1>
+        <nav>
+            <a href="#home" aria-label="Home">Home</a>
+            <a href="#settings" aria-label="Settings">Settings</a>
+            <a href="#about" aria-label="About">About</a>
+        </nav>
     </header>
-    <main>
-        <section class="timer-controls scroll-section">
-            <h2>Choose Yer Break</h2>
-            <div class="options">
-                <button class="break-btn" data-minutes="5">5 Min</button>
-                <button class="break-btn" data-minutes="10">10 Min</button>
-                <button class="break-btn" data-minutes="15">15 Min</button>
+    <main id="home">
+        <section class="timer-section">
+            <h2>Time for a Break</h2>
+            <div class="timer-controls">
+                <label for="break-duration">Break Duration (minutes):</label>
+                <input type="number" id="break-duration" min="1" value="5" aria-label="Break duration in minutes">
+                <button id="start-pause" aria-label="Start or pause timer">Start</button>
+                <button id="reset" aria-label="Reset timer">Reset</button>
             </div>
-            <div class="timer-display">
-                <span id="timer">00:00</span>
-                <button id="toggle-btn">Start</button>
-                <button id="reset-btn">Reset</button>
+            <div class="progress-container">
+                <svg class="progress-ring" width="200" height="200">
+                    <circle class="progress-ring__circle" stroke="#4caf50" stroke-width="10" fill="transparent" r="90" cx="100" cy="100"/>
+                </svg>
+                <div class="timer-display" aria-live="polite">05:00</div>
             </div>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar"></div>
+            <div class="activity-suggestion">
+                <p id="activity-text">Press Start for a relaxing activity!</p>
             </div>
+            <div class="progress-summary">
+                <p>Breaks Today: <span id="break-count">0</span> | Total Time: <span id="total-time">0 min</span></p>
+                <p id="reward-text"></p>
+            </div>
+        </section>
+        <section id="settings" class="settings-section hidden">
+            <h2>Settings</h2>
+            <label><input type="checkbox" id="notifications"> Enable Notifications</label>
+            <label for="reminder-interval">Break Reminder Every (minutes):</label>
+            <input type="number" id="reminder-interval" min="10" value="60">
+            <label><input type="checkbox" id="sound"> Enable Sound</label>
+            <button id="dark-mode-toggle">Toggle Dark Mode</button>
+        </section>
+        <section id="about" class="about-section hidden">
+            <h2>About BreakBuddy</h2>
+            <p>BreakBuddy helps you recharge by encouraging regular breaks with nature-inspired vibes. Take a moment to stretch, breathe, or relax—your mind will thank you!</p>
         </section>
     </main>
     <footer>
-        <p>© 2025 Kunj Patel. Decoded from the Matrix. | <a href="https://kunjpatelx.github.io/Portfolio/" target="_blank">Portfolio</a></p>
+        <p>&copy; 2025 BreakBuddy. All rights reserved.</p>
     </footer>
-    <audio id="breakSound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
+    <audio id="notification-sound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
     <script src="script.js"></script>
 </body>
 </html>
