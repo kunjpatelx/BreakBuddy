@@ -1,156 +1,161 @@
-console.log("BreakBuddy loaded - Hack Your Burnout!");
+// DOM Elements
+const breakDurationInput = document.getElementById('break-duration');
+const startPauseButton = document.getElementById('start-pause');
+const resetButton = document.getElementById('reset');
+const timerDisplay = document.querySelector('.timer-display');
+const activityText = document.getElementById('activity-text');
+const progressRing = document.querySelector('.progress-ring__circle');
+const breakCountSpan = document.getElementById('break-count');
+const totalTimeSpan = document.getElementById('total-time');
+const rewardText = document.getElementById('reward-text');
+const notificationsCheckbox = document.getElementById('notifications');
+const reminderIntervalInput = document.getElementById('reminder-interval');
+const soundCheckbox = document.getElementById('sound');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+const notificationSound = document.getElementById('notification-sound');
+const navLinks = document.querySelectorAll('nav a');
+const sections = document.querySelectorAll('main > section');
 
-// Matrix Background Animation
-const canvas = document.getElementById("matrixCanvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = Array(Math.floor(columns)).fill(1);
-
-function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#00ff00";
-    ctx.font = `${fontSize}px 'Courier New'`;
-
-    for (let i = 0; i < drops.length; i++) {
-        const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
-        drops[i]++;
-    }
-}
-
-let frameCount = 0;
-function animateCanvas() {
-    draw();
-    frameCount++;
-    if (frameCount === 300) {
-        canvas.style.transition = "opacity 2s";
-        canvas.style.opacity = "0.2";
-    }
-    requestAnimationFrame(animateCanvas);
-}
-
-animateCanvas();
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drops.length = Math.floor(canvas.width / fontSize);
-    drops.fill(1);
-});
-
-// GSAP Animations
-gsap.from("#title", { opacity: 0, y: -50, duration: 1, delay: 0.5, ease: "power2.out" });
-gsap.from("#tagline", { opacity: 0, y: 20, duration: 1, delay: 1, ease: "power2.out" });
-
-gsap.registerPlugin(ScrollTrigger);
-gsap.from(".timer-controls", {
-    scrollTrigger: { trigger: ".timer-controls", start: "top 80%" },
-    opacity: 0,
-    y: 50,
-    duration: 1,
-    ease: "power2.out"
-});
-
-// Timer Logic
+// Timer Variables
 let timeLeft = 0;
-let timerInterval = null;
-const timerDisplay = document.getElementById("timer");
-const toggleBtn = document.getElementById("toggle-btn");
-const resetBtn = document.getElementById("reset-btn");
-const progressBar = document.getElementById("progress-bar");
-const breakSound = document.getElementById("breakSound");
 let totalTime = 0;
 let isRunning = false;
+let timerInterval = null;
+let reminderInterval = null;
 
-document.querySelectorAll(".break-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        if (isRunning) return; // Prevent changes while running
-        const minutes = parseInt(btn.getAttribute("data-minutes"));
-        timeLeft = minutes * 60;
-        totalTime = timeLeft;
-        updateTimerDisplay();
-        progressBar.style.width = "0%"; // Reset progress bar
-    });
+// Progress Ring Setup
+const radius = progressRing.r.baseVal.value;
+const circumference = 2 * Math.PI * radius;
+progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+progressRing.style.strokeDashoffset = circumference;
 
-    // GSAP Hover Effect
-    btn.addEventListener("mouseenter", () => {
-        gsap.to(btn, { scale: 1.1, duration: 0.3, ease: "power1.out" });
-    });
-    btn.addEventListener("mouseleave", () => {
-        gsap.to(btn, { scale: 1, duration: 0.3, ease: "power1.out" });
-    });
-});
+// Activity Suggestions
+const activities = {
+    physical: ["Stretch your arms", "Take a short walk", "Do a quick yoga pose"],
+    mental: ["Practice deep breathing", "Close your eyes for a minute", "Meditate briefly"],
+    fun: ["Doodle something silly", "Listen to a song", "Watch a funny video"]
+};
+
+// Progress Tracking
+let breakCount = parseInt(localStorage.getItem('breakCount')) || 0;
+let totalBreakTime = parseInt(localStorage.getItem('totalBreakTime')) || 0;
+breakCountSpan.textContent = breakCount;
+totalTimeSpan.textContent = totalBreakTime;
+
+// Functions
+function setProgress(percent) {
+    const offset = circumference - (percent / 100) * circumference;
+    progressRing.style.strokeDashoffset = offset;
+}
 
 function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-    const seconds = (timeLeft % 60).toString().padStart(2, "0");
+    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const seconds = (timeLeft % 60).toString().padStart(2, '0');
     timerDisplay.textContent = `${minutes}:${seconds}`;
 }
 
 function startTimer() {
-    if (timeLeft <= 0) return; // No time set
+    if (timeLeft <= 0) return;
     if (!isRunning) {
         isRunning = true;
-        toggleBtn.textContent = "Pause";
+        startPauseButton.textContent = 'Pause';
+        const category = Object.keys(activities)[Math.floor(Math.random() * 3)];
+        const activityList = activities[category];
+        activityText.textContent = activityList[Math.floor(Math.random() * activityList.length)];
         timerInterval = setInterval(() => {
             timeLeft--;
             updateTimerDisplay();
-            const progress = (totalTime - timeLeft) / totalTime * 100;
-
-            // Anime.js Progress Bar Animation
-            anime({
-                targets: progressBar,
-                width: `${progress}%`,
-                duration: 1000,
-                easing: "linear"
-            });
-
+            const percent = (timeLeft / totalTime) * 100;
+            setProgress(percent);
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 isRunning = false;
-                toggleBtn.textContent = "Start";
-                breakSound.play(); // Play sound when break ends
-                alert("Break’s over, player! Back to the grind!");
+                startPauseButton.textContent = 'Start';
+                activityText.textContent = 'Break over! Feeling refreshed?';
+                breakCount++;
+                totalBreakTime += totalTime / 60;
+                localStorage.setItem('breakCount', breakCount);
+                localStorage.setItem('totalBreakTime', totalBreakTime);
+                breakCountSpan.textContent = breakCount;
+                totalTimeSpan.textContent = Math.round(totalBreakTime);
+                checkRewards();
+                if (soundCheckbox.checked) notificationSound.play();
             }
         }, 1000);
     } else {
         clearInterval(timerInterval);
         isRunning = false;
-        toggleBtn.textContent = "Start";
+        startPauseButton.textContent = 'Start';
     }
 }
 
 function resetTimer() {
     clearInterval(timerInterval);
     isRunning = false;
-    timeLeft = 0;
-    totalTime = 0;
+    timeLeft = parseInt(breakDurationInput.value) * 60 || 0;
+    totalTime = timeLeft;
     updateTimerDisplay();
-    progressBar.style.width = "0%";
-    toggleBtn.textContent = "Start";
+    setProgress(100);
+    activityText.textContent = 'Press Start for a relaxing activity!';
+    startPauseButton.textContent = 'Start';
 }
 
-toggleBtn.addEventListener("click", startTimer);
-resetBtn.addEventListener("click", resetTimer);
+function checkRewards() {
+    if (breakCount % 5 === 0) {
+        rewardText.textContent = `Great job! You've earned a ${breakCount}-break streak badge!`;
+    } else {
+        rewardText.textContent = '';
+    }
+}
 
-// GSAP Hover Effect for Toggle and Reset Buttons
-[toggleBtn, resetBtn].forEach(btn => {
-    btn.addEventListener("mouseenter", () => {
-        gsap.to(btn, { scale: 1.1, duration: 0.3, ease: "power1.out" });
-    });
-    btn.addEventListener("mouseleave", () => {
-        gsap.to(btn, { scale: 1, duration: 0.3, ease: "power1.out" });
+function setReminder() {
+    if (reminderInterval) clearInterval(reminderInterval);
+    if (notificationsCheckbox.checked && Notification.permission === 'granted') {
+        const interval = parseInt(reminderIntervalInput.value) * 60 * 1000;
+        reminderInterval = setInterval(() => {
+            new Notification('BreakBuddy Reminder', { body: 'Time for a break!' });
+            if (soundCheckbox.checked) notificationSound.play();
+        }, interval);
+    }
+}
+
+// Event Listeners
+breakDurationInput.addEventListener('change', () => {
+    if (!isRunning) resetTimer();
+});
+
+startPauseButton.addEventListener('click', startTimer);
+resetButton.addEventListener('click', resetTimer);
+
+notificationsCheckbox.addEventListener('change', () => {
+    if (notificationsCheckbox.checked && Notification.permission !== 'granted') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') setReminder();
+        });
+    } else {
+        setReminder();
+    }
+});
+
+reminderIntervalInput.addEventListener('change', setReminder);
+soundCheckbox.addEventListener('change', setReminder);
+
+darkModeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+});
+
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = link.getAttribute('href').substring(1);
+        sections.forEach(section => {
+            section.classList.toggle('hidden', section.id !== target);
+        });
     });
 });
+
+// Initial Setup
+resetTimer();
+if (Notification.permission === 'granted') setReminder();
+
+// Note: Replace notification sound src with a valid URL if needed
