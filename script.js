@@ -1,162 +1,146 @@
-const breakSuggestions = {
-    relaxation: [
-        "Take 10 slow, deep breaths with your eyes closed.",
-        "Listen to a calming song for a minute.",
-        "Imagine you’re on a quiet beach—just chill.",
-        "Rest your head on your desk for 30 seconds."
-    ],
-    physical: [
-        "Stretch your arms overhead for 30 seconds.",
-        "Do 5 quick jumping jacks by your desk.",
-        "Walk to the nearest window and back.",
-        "Roll your shoulders 10 times."
-    ],
-    mental: [
-        "Jot down three things you’re grateful for.",
-        "Doodle a silly shape on some paper.",
-        "Think of a fun riddle and guess the answer.",
-        "Count backward from 20 in your head."
-    ]
-};
+console.log("BreakBuddy loaded - Hack Your Burnout!");
 
-const techniques = {
-    "pomodoro": { work: 25, break: 5 },
-    "52-17": { work: 52, break: 17 },
-    "90-minute": { work: 90, break: 20 },
-    "20-20-20": { work: 20, break: 0.33 }
-};
+const canvas = document.getElementById("matrixCanvas");
+const ctx = canvas.getContext("2d");
 
-let timerInterval = null;
-let isPaused = false;
-let timeLeft = 0;
-let isBreak = false;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-function toggleMode() {
-    const body = document.body;
-    const button = document.getElementById("modeSwitch");
-    if (body.classList.contains("light")) {
-        body.classList.remove("light");
-        body.classList.add("dark");
-        button.textContent = "Light Mode";
-    } else {
-        body.classList.remove("dark");
-        body.classList.add("light");
-        button.textContent = "Dark Mode";
+const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
+
+function draw() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#00ff00";
+    ctx.font = `${fontSize}px 'Courier New'`;
+
+    for (let i = 0; i < drops.length; i++) {
+        const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
     }
 }
 
-document.body.classList.add("light");
+let frameCount = 0;
+function animateCanvas() {
+    draw();
+    frameCount++;
+    if (frameCount === 300) {
+        canvas.style.transition = "opacity 2s";
+        canvas.style.opacity = "0.2";
+    }
+    requestAnimationFrame(animateCanvas);
+}
 
-function updateCustomFields() {
-    const technique = document.getElementById("technique").value;
-    const customFields = document.querySelector(".custom-fields");
-    customFields.style.display = technique === "custom" ? "block" : "none";
+animateCanvas();
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drops.length = Math.floor(canvas.width / fontSize);
+    drops.fill(1);
+});
+
+// GSAP Header Animation
+gsap.from("#title", { opacity: 0, y: -50, duration: 1, delay: 0.5, ease: "power2.out" });
+gsap.from("#tagline", { opacity: 0, y: 20, duration: 1, delay: 1, ease: "power2.out" });
+
+// ScrollTrigger for Timer Controls
+gsap.registerPlugin(ScrollTrigger);
+
+gsap.from(".timer-controls", {
+    scrollTrigger: {
+        trigger: ".timer-controls",
+        start: "top 80%"
+    },
+    opacity: 0,
+    y: 50,
+    duration: 1,
+    ease: "power2.out"
+});
+
+// Timer Logic
+let timeLeft = 0;
+let timerInterval = null;
+const timerDisplay = document.getElementById("timer");
+const toggleBtn = document.getElementById("toggle-btn");
+const progressBar = document.getElementById("progress-bar");
+const breakSound = document.getElementById("breakSound");
+let totalTime = 0;
+let isRunning = false;
+
+document.querySelectorAll(".break-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        if (isRunning) return; // Prevent changes while running
+        const minutes = parseInt(btn.getAttribute("data-minutes"));
+        timeLeft = minutes * 60;
+        totalTime = timeLeft;
+        updateTimerDisplay();
+        progressBar.style.width = "100%"; // Reset progress bar
+    });
+
+    // GSAP Hover Effect (Framer Motion-inspired)
+    btn.addEventListener("mouseenter", () => {
+        gsap.to(btn, { scale: 1.1, duration: 0.3, ease: "power1.out" });
+    });
+    btn.addEventListener("mouseleave", () => {
+        gsap.to(btn, { scale: 1, duration: 0.3, ease: "power1.out" });
+    });
+});
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+    const seconds = (timeLeft % 60).toString().padStart(2, "0");
+    timerDisplay.textContent = `${minutes}:${seconds}`;
 }
 
 function startTimer() {
-    if (timerInterval) clearInterval(timerInterval);
+    if (timeLeft <= 0) return; // No time set
+    if (!isRunning) {
+        isRunning = true;
+        toggleBtn.textContent = "Pause";
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            const progress = (timeLeft / totalTime) * 100;
 
-    const technique = document.getElementById("technique").value;
-    const breakType = document.getElementById("breakType").value;
-    let workTime, breakTime;
+            // Anime.js Progress Bar Animation
+            anime({
+                targets: progressBar,
+                width: `${progress}%`,
+                duration: 1000,
+                easing: "linear"
+            });
 
-    if (technique === "custom") {
-        workTime = parseFloat(document.getElementById("workTime").value) * 60;
-        breakTime = parseFloat(document.getElementById("breakTime").value);
-    } else {
-        workTime = techniques[technique].work * 60;
-        breakTime = techniques[technique].break;
-    }
-
-    if (workTime < 1 || breakTime < 0.1) {
-        alert("Please enter valid times!");
-        return;
-    }
-
-    timeLeft = workTime;
-    isBreak = false;
-    runTimer(workTime, breakTime, breakType);
-}
-
-function pauseTimer() {
-    if (!timerInterval) return;
-    if (isPaused) {
-        runTimer(timeLeft, null, null, true);
-        document.getElementById("pauseBtn").textContent = "Pause";
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                toggleBtn.textContent = "Start";
+                breakSound.play(); // Play sound when break ends
+                alert("Break’s over, player! Back to the grind!");
+            }
+        }, 1000);
     } else {
         clearInterval(timerInterval);
-        timerInterval = null;
+        isRunning = false;
+        toggleBtn.textContent = "Start";
     }
-    isPaused = !isPaused;
 }
 
-function resetTimer() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    isPaused = false;
-    timeLeft = 0;
-    isBreak = false;
-    document.getElementById("timerDisplay").textContent = "Select a technique to begin.";
-    document.getElementById("status").textContent = "Ready to start your workday?";
-    document.getElementById("startBtn").disabled = false;
-    document.getElementById("pauseBtn").disabled = true;
-    document.getElementById("resetBtn").disabled = true;
-    document.getElementById("feelingCheck").style.display = "none";
-}
+toggleBtn.addEventListener("click", startTimer);
 
-function runTimer(workTime, breakTime, breakType, resume = false) {
-    const status = document.getElementById("status");
-    const timerDisplay = document.getElementById("timerDisplay");
-    const startBtn = document.getElementById("startBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resetBtn = document.getElementById("resetBtn");
-
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
-    resetBtn.disabled = false;
-
-    if (!resume) {
-        status.textContent = `Working for ${Math.floor(workTime / 60)} minutes...`;
-    }
-
-    timerInterval = setInterval(() => {
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = Math.round(timeLeft % 60);
-        timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" + seconds : seconds} ${isBreak ? "break" : "work"} remaining`;
-        
-        timeLeft--;
-        if (timeLeft < 0) {
-            clearInterval(timerInterval);
-            if (!isBreak) {
-                let suggestion = breakSuggestions[breakType][Math.floor(Math.random() * breakSuggestions[breakType].length)];
-                let breakText = breakTime < 1 ? `${Math.round(breakTime * 60)} seconds` : `${breakTime} minutes`;
-                showPopup(`Time for a ${breakText} break! ${suggestion}`);
-                status.textContent = "Break time. Relax and recharge.";
-                timeLeft = breakTime * 60;
-                isBreak = true;
-                runTimer(breakTime * 60, breakTime, breakType);
-            } else {
-                status.textContent = "Break’s over! How do you feel?";
-                timerDisplay.textContent = "Ready for your next session.";
-                document.getElementById("feelingCheck").style.display = "block";
-                startBtn.disabled = false;
-                pauseBtn.disabled = true;
-                resetBtn.disabled = true;
-            }
-        }
-    }, 1000);
-}
-
-function showPopup(message) {
-    let popup = document.createElement("div");
-    popup.className = "popup";
-    popup.textContent = message;
-    document.body.appendChild(popup);
-    setTimeout(() => popup.remove(), 7000);
-}
-
-function logFeeling(feeling) {
-    console.log(`User felt: ${feeling}`); // Placeholder—could store or display later
-    document.getElementById("feelingCheck").style.display = "none";
-    document.getElementById("status").textContent = `Glad you’re feeling ${feeling.toLowerCase()}! Ready for more?`;
-}
+// GSAP Hover Effect for Toggle Button
+toggleBtn.addEventListener("mouseenter", () => {
+    gsap.to(toggleBtn, { scale: 1.1, duration: 0.3, ease: "power1.out" });
+});
+toggleBtn.addEventListener("mouseleave", () => {
+    gsap.to(toggleBtn, { scale: 1, duration: 0.3, ease: "power1.out" });
+});
